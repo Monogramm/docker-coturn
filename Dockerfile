@@ -25,10 +25,33 @@ FROM alpine:edge
 
 LABEL maintainer="mathieu.brunot at monogramm dot io"
 
+# Environment variables for setup
+ENV COTURN_VERSION=4.5.1.1 \
+	LISTENING_PORT="3478" \
+	TLS_LISTENING_PORT="5349" \
+	ALT_LISTENING_PORT="3479" \
+	ALT_TLS_LISTENING_PORT="5350" \
+	CIPHER_LIST="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5" \
+	REALM="localdomain" \
+	MIN_PORT="49152" \
+	MAX_PORT="65535" \
+	MAX_BPS="640000" \
+	BPS_CAPACITY="6400000" \
+	USER_QUOTA=100 \
+	TOTAL_QUOTA=300 \
+	USER_DB="/srv/turnserver/turndb" \
+	LOG_FILE="syslog"
+
+
+# Add coturn
+COPY docker-entrypoint.sh /entrypoint.sh
+
 # Build and install Coturn
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' \
-    # TODO: remove after mongo-c-driver moves to main/community from testing
-          >> /etc/apk/repositories \
+RUN set -ex; \
+	chmod 755 /entrypoint.sh; \
+	echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' \
+	# TODO: remove after mongo-c-driver moves to main/community from testing
+			>> /etc/apk/repositories \
 	&& apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
@@ -57,7 +80,7 @@ RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' \
 		\
 	# Download and prepare Coturn sources
 	&& curl -fL -o /tmp/coturn.tar.gz \
-			https://github.com/coturn/coturn/archive/4.5.1.1.tar.gz \
+			https://github.com/coturn/coturn/archive/$COTURN_VERSION.tar.gz \
 	&& tar -xzf /tmp/coturn.tar.gz -C /tmp/ \
 	&& cd /tmp/coturn-* \
 		\
@@ -83,31 +106,10 @@ RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' \
 	# Cleanup unnecessary stuff
 	&& apk del .tool-deps .build-deps \
 	&& rm -rf /var/cache/apk/* \
-			/tmp/*	
-
-
-# Environment variables for setup
-ENV LISTENING_PORT="3478" \
-	TLS_LISTENING_PORT="5349" \
-	ALT_LISTENING_PORT="3479" \
-	ALT_TLS_LISTENING_PORT="5350" \
-	CIPHER_LIST="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5" \
-	REALM="localdomain" \
-	MIN_PORT="49152" \
-	MAX_PORT="65535" \
-	MAX_BPS="640000" \
-	BPS_CAPACITY="6400000" \
-	USER_QUOTA=100 \
-	TOTAL_QUOTA=300 \
-	USER_DB="/srv/turnserver/turndb" \
-	LOG_FILE="syslog"
-
-
-# Add coturn 
-ADD docker-entrypoint.sh /
+			/tmp/*
 
 # Allow volume.
-VOLUME = /srv
+VOLUME /srv
 
 WORKDIR /
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["sh","/entrypoint.sh"]
