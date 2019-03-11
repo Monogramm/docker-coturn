@@ -24,7 +24,7 @@
 # https://hub.docker.com/_/alpine
 FROM alpine:edge
 
-LABEL maintainer="mathieu.brunot at monogramm dot io"
+LABEL maintainer="Mathieu BRUNOT <mathieu.brunot at monogramm dot io>"
 
 # Environment variables for setup
 ENV COTURN_VERSION=4.5.1.1 \
