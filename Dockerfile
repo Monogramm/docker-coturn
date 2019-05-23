@@ -27,7 +27,7 @@ FROM alpine:edge
 LABEL maintainer="mathieu.brunot at monogramm dot io"
 
 # Environment variables for setup
-ENV COTURN_VERSION=4.5.1.2 \
+ENV COTURN_VERSION=4.5.1.1 \
 	LISTENING_PORT="3478" \
 	TLS_LISTENING_PORT="5349" \
 	ALT_LISTENING_PORT="3479" \
