@@ -28,8 +28,8 @@ notifications:
 
 matrix:
   allow_failures:
-    - env: VERSION=latest
+    - env: VERSION=master
 
 env: # Environments
   - VERSION=4.5.1.1
-  - VERSION=latest
+  - VERSION=master
