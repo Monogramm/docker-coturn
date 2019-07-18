@@ -21,7 +21,7 @@ script:
   - docker run --name "$name" -d "$image" "$dir" && sleep 60
   - docker ps
   - docker logs "$name"
-  - docker ps "$name" | grep "Up" || exit 1
+  - docker ps | grep "Up" || exit 1
 
 notifications:
   email: false
