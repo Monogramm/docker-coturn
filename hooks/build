@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# See documentation for details:
+# https://docs.docker.com/docker-hub/builds/advanced/
+# https://microbadger.com/labels
+
+# Use $VERSION build environment variable or the Docker repository tag being built
+VERSION=${VERSION:-${DOCKER_TAG}}
+
+docker build \
+    --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+    --build-arg VCS_REF=`git rev-parse --short HEAD` \
+    --build-arg VERSION=$VERSION \
+    -f $DOCKERFILE_PATH \
+    -t $IMAGE_NAME .

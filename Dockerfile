@@ -24,11 +24,23 @@
 # https://hub.docker.com/_/alpine
 FROM alpine:edge
 
-LABEL maintainer="Monogramm Maintainers <opensource at monogramm dot io>"
-
 # Build arguments
-ARG COTURN_VERSION=4.5.1.1
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
 ARG MONGO_C_DRIVER_VERSION=1.14.0
+
+# Labels (docker maintainer + http://label-schema.org/)
+LABEL maintainer="Monogramm Maintainers <opensource at monogramm dot io>" \
+	org.label-schema.build-date=$BUILD_DATE \
+	org.label-schema.name="coturn" \
+	org.label-schema.description="Free open source implementation of TURN and STUN Server" \
+	org.label-schema.url="https://github.com/coturn/coturn" \
+	org.label-schema.vcs-ref=$VCS_REF \
+	org.label-schema.vcs-url="https://github.com/Monogramm/docker-coturn" \
+	org.label-schema.vendor="Monogramm" \
+	org.label-schema.version=$VERSION \
+	org.label-schema.schema-version="1.0"
 
 # Add coturn entrypoint
 COPY docker-entrypoint.sh /entrypoint.sh
@@ -111,7 +123,7 @@ RUN set -ex; \
 	# Download and prepare Coturn sources
 	&& curl -fL \
 		-o /tmp/coturn.tar.gz \
-		https://github.com/coturn/coturn/archive/${COTURN_VERSION}.tar.gz \
+		https://github.com/coturn/coturn/archive/${VERSION}.tar.gz \
 	&& tar -xzf /tmp/coturn.tar.gz -C /tmp/ \
 	&& cd /tmp/coturn-* \
 	\

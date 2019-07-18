@@ -16,15 +16,20 @@ before_script:
   - dir="."
 
 script:
-  - travis_retry docker build -t "$image" "$dir"
-
-after_script:
+  - travis_retry docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=$VERSION -t "$image" "$dir"
   - docker images
-  - docker run --name "$name" -d "$image" "$dir"
+  - docker run --name "$name" -d "$image" "$dir" && sleep 60
   - docker ps
   - docker logs "$name"
+  - docker ps "$name" | grep "Up" || exit 1
 
 notifications:
   email: false
 
+matrix:
+  allow_failures:
+    - env: VERSION=latest
+
 env: # Environments
+  - VERSION=4.5.1.1
+  - VERSION=latest
