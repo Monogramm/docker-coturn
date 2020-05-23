@@ -75,7 +75,7 @@ ARG MONGO_C_DRIVER_VERSION=1.14.0
 # Check mongo-c-driver build
 # Install mongo-c-driver
 RUN set -ex; \
-	&& curl -fL \
+	curl -fL \
 		-o /tmp/mongo-c-driver.tar.gz \
 		https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz \
  	&& tar -xzf /tmp/mongo-c-driver.tar.gz -C /tmp/ \
@@ -114,7 +114,7 @@ ARG VERSION=master
 # Remove default config file
 # Cleanup unnecessary stuff
 RUN set -ex; \
-	&& curl -fL \
+	curl -fL \
 		-o /tmp/coturn.tar.gz \
 		https://github.com/coturn/coturn/archive/${VERSION}.tar.gz \
 	&& tar -xzf /tmp/coturn.tar.gz -C /tmp/ \
