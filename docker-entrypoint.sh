@@ -178,7 +178,6 @@ exec turnserver \
 	-n \
 	$ARGS \
 	--fingerprint \
-	--dh2066 \
 	--stale-nonce \
 	--check-origin-consistency \
 	--no-multicast-peers \
