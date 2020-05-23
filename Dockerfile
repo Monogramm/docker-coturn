@@ -29,7 +29,6 @@ FROM alpine:3
 # Install tools for building
 # Install Coturn build dependencies
 RUN set -ex; \
-	chmod 755 /entrypoint.sh; \
 	apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
@@ -165,10 +164,13 @@ ENV LISTENING_PORT="3478" \
 # Add coturn entrypoint
 COPY docker-entrypoint.sh /entrypoint.sh
 
+RUN set -ex; \
+	chmod 755 /entrypoint.sh
+
 WORKDIR /
 ENTRYPOINT ["sh","/entrypoint.sh"]
 
-# Build arguments
+# Label build arguments
 ARG BUILD_DATE
 ARG VCS_REF
 
