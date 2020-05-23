@@ -24,10 +24,27 @@
 # https://hub.docker.com/_/alpine
 FROM alpine:3
 
+# mongo-c-driver build arguments
+ARG MONGO_C_DRIVER_VERSION=1.14.0
+# Coturn build arguments
+ARG VERSION=master
+
 # Build and install Coturn
-# Install Coturn dependencies
-# Install tools for building
-# Install Coturn build dependencies
+#   Install Coturn dependencies
+#   Install tools for building
+#   Install Coturn build dependencies
+# Download and prepare mongo-c-driver sources
+#   Build mongo-c-driver from sources
+#   https://git.alpinelinux.org/aports/tree/non-free/mongo-c-driver/APKBUILD
+#   Check mongo-c-driver build
+#   Install mongo-c-driver
+# Download and prepare Coturn sources
+#   Build Coturn from sources
+#   (No documentation included to keep image size smaller)
+#   Install and configure Coturn
+#   Preserve license file
+#   Remove default config file
+#   Cleanup unnecessary stuff
 RUN set -ex; \
 	apk update \
 	&& apk upgrade \
@@ -64,17 +81,7 @@ RUN set -ex; \
 		snappy-dev \
 		sqlite-dev \
 		zlib-dev \
-	;
-
-# mongo-c-driver build arguments
-ARG MONGO_C_DRIVER_VERSION=1.14.0
-
-# Download and prepare mongo-c-driver sources
-# Build mongo-c-driver from sources
-# https://git.alpinelinux.org/aports/tree/non-free/mongo-c-driver/APKBUILD
-# Check mongo-c-driver build
-# Install mongo-c-driver
-RUN set -ex; \
+	; \
 	curl -fL \
 		-o /tmp/mongo-c-driver.tar.gz \
 		https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz \
@@ -101,19 +108,7 @@ RUN set -ex; \
  	   MONGOC_TEST_SKIP_LIVE=on \
  	   make check \
 	\
-	&& make install
-
-# Coturn build arguments
-ARG VERSION=master
-
-# Download and prepare Coturn sources
-# Build Coturn from sources
-# (No documentation included to keep image size smaller)
-# Install and configure Coturn
-# Preserve license file
-# Remove default config file
-# Cleanup unnecessary stuff
-RUN set -ex; \
+	&& make install; \
 	curl -fL \
 		-o /tmp/coturn.tar.gz \
 		https://github.com/coturn/coturn/archive/${VERSION}.tar.gz \
