@@ -22,32 +22,13 @@
 # used as storage for persistent data created by the TURN server.
 
 # https://hub.docker.com/_/alpine
-FROM alpine:edge
-
-# Build arguments
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-ARG MONGO_C_DRIVER_VERSION=1.14.0
-
-# Labels (docker maintainer + http://label-schema.org/)
-LABEL maintainer="Monogramm Maintainers <opensource at monogramm dot io>" \
-	org.label-schema.build-date=$BUILD_DATE \
-	org.label-schema.name="coturn" \
-	org.label-schema.description="Free open source implementation of TURN and STUN Server" \
-	org.label-schema.url="https://github.com/coturn/coturn" \
-	org.label-schema.vcs-ref=$VCS_REF \
-	org.label-schema.vcs-url="https://github.com/Monogramm/docker-coturn" \
-	org.label-schema.vendor="Monogramm" \
-	org.label-schema.version=$VERSION \
-	org.label-schema.schema-version="1.0"
-
-# Add coturn entrypoint
-COPY docker-entrypoint.sh /entrypoint.sh
+FROM alpine:3
 
 # Build and install Coturn
+# Install Coturn dependencies
+# Install tools for building
+# Install Coturn build dependencies
 RUN set -ex; \
-	chmod 755 /entrypoint.sh; \
 	apk update \
 	&& apk upgrade \
 	&& apk add --no-cache \
@@ -55,7 +36,6 @@ RUN set -ex; \
 		curl \
 	&& update-ca-certificates \
 	\
-	# Install Coturn dependencies
 	&& apk add --no-cache \
 		hiredis \
 		libevent \
@@ -66,7 +46,6 @@ RUN set -ex; \
 		sqlite-libs \
 		zlib \
 	\
-	# Install tools for building
 	&& apk add --no-cache --virtual .tool-deps \
 		autoconf \
 		cmake \
@@ -75,7 +54,6 @@ RUN set -ex; \
 		libtool \
 		make \
 	\
-	# Install Coturn build dependencies
 	&& apk add --no-cache --virtual .build-deps \
 		hiredis-dev \
 		linux-headers \
@@ -86,15 +64,22 @@ RUN set -ex; \
 		snappy-dev \
 		sqlite-dev \
 		zlib-dev \
-	\
-	# Download and prepare mongo-c-driver sources
-	&& curl -fL \
+	;
+
+# mongo-c-driver build arguments
+ARG MONGO_C_DRIVER_VERSION=1.14.0
+
+# Download and prepare mongo-c-driver sources
+# Build mongo-c-driver from sources
+# https://git.alpinelinux.org/aports/tree/non-free/mongo-c-driver/APKBUILD
+# Check mongo-c-driver build
+# Install mongo-c-driver
+RUN set -ex; \
+	curl -fL \
 		-o /tmp/mongo-c-driver.tar.gz \
 		https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz \
  	&& tar -xzf /tmp/mongo-c-driver.tar.gz -C /tmp/ \
  	&& cd /tmp/mongo-c-driver-* \
- 	# Build mongo-c-driver from sources
- 	# https://git.alpinelinux.org/aports/tree/non-free/mongo-c-driver/APKBUILD
  	&& mkdir -p /tmp/build/mongo-c-driver/ \
 	&& cd /tmp/build/mongo-c-driver/ \
  	&& cmake \
@@ -111,48 +96,50 @@ RUN set -ex; \
 			-DCMAKE_SKIP_RPATH=ON \
 		/tmp/mongo-c-driver-* \
  	&& make \
- 	# Check mongo-c-driver build
 	&& MONGOC_TEST_SKIP_MOCK=on \
  	   MONGOC_TEST_SKIP_SLOW=on \
  	   MONGOC_TEST_SKIP_LIVE=on \
  	   make check \
 	\
- 	# Install mongo-c-driver
-	&& make install \
-	\
-	# Download and prepare Coturn sources
-	&& curl -fL \
+	&& make install
+
+# Coturn build arguments
+ARG VERSION=master
+
+# Download and prepare Coturn sources
+# Build Coturn from sources
+# (No documentation included to keep image size smaller)
+# Install and configure Coturn
+# Preserve license file
+# Remove default config file
+# Cleanup unnecessary stuff
+RUN set -ex; \
+	curl -fL \
 		-o /tmp/coturn.tar.gz \
 		https://github.com/coturn/coturn/archive/${VERSION}.tar.gz \
 	&& tar -xzf /tmp/coturn.tar.gz -C /tmp/ \
 	&& cd /tmp/coturn-* \
 	\
-	# Build Coturn from sources
 	&& ./configure --prefix=/usr \
 		--turndbdir=/var/lib/coturn \
 		--disable-rpath \
 		--sysconfdir=/etc/coturn \
-		# No documentation included to keep image size smaller
 		--mandir=/tmp/coturn/man \
 		--docsdir=/tmp/coturn/docs \
 		--examplesdir=/tmp/coturn/examples \
 	&& make \
 	\
-	# Install and configure Coturn
 	&& make install \
-	# Preserve license file
 	&& mkdir -p /usr/share/licenses/coturn/ \
 	&& cp /tmp/coturn/docs/LICENSE /usr/share/licenses/coturn/ \
-	# Remove default config file
 	&& rm -f /etc/coturn/turnserver.conf.default \
 	\
-	# Cleanup unnecessary stuff
 	&& apk del .tool-deps .build-deps \
 	&& rm -rf \
 		/var/cache/apk/* \
 		/tmp/*
 
-# Allow volume.
+# Allow volume
 VOLUME /srv
 
 # Environment variables for runtime setup
@@ -174,5 +161,27 @@ ENV LISTENING_PORT="3478" \
 	LOG_FILE="/srv/turnserver/logs/turn.log" \
 	PID_FILE="/srv/turnserver/turn.pid"
 
+# Add coturn entrypoint
+COPY docker-entrypoint.sh /entrypoint.sh
+
+RUN set -ex; \
+	chmod 755 /entrypoint.sh
+
 WORKDIR /
 ENTRYPOINT ["sh","/entrypoint.sh"]
+
+# Label build arguments
+ARG BUILD_DATE
+ARG VCS_REF
+
+# Labels (docker maintainer + http://label-schema.org/)
+LABEL maintainer="Monogramm Maintainers <opensource at monogramm dot io>" \
+	org.label-schema.build-date=${BUILD_DATE} \
+	org.label-schema.name="coturn" \
+	org.label-schema.description="Free open source implementation of TURN and STUN Server" \
+	org.label-schema.url="https://github.com/coturn/coturn" \
+	org.label-schema.vcs-ref=${VCS_REF} \
+	org.label-schema.vcs-url="https://github.com/Monogramm/docker-coturn" \
+	org.label-schema.vendor="Monogramm" \
+	org.label-schema.version=${VERSION} \
+	org.label-schema.schema-version="1.0"

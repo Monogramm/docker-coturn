@@ -1,9 +1,9 @@
-dist: trusty
-sudo: required
+os: linux
+dist: bionic
 
 services: docker
 
-language: bash
+language: shell
 
 branches:
   only:
@@ -26,10 +26,10 @@ script:
 notifications:
   email: false
 
-matrix:
+jobs:
   allow_failures:
     - env: VERSION=master
 
 env: # Environments
-  - VERSION=4.5.1.1
+  - VERSION=4.5.1.2
   - VERSION=master
