@@ -1,0 +1,72 @@
+version: "2.3"
+
+services:
+  # https://docs.docker.com/docker-hub/builds/automated-testing/
+  sut:
+    build:
+      context: ./test
+      dockerfile: Dockerfile
+    depends_on:
+      coturn:
+        condition: service_started
+    volumes_from:
+      - coturn
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  coturn:
+    # For development or CI, tag build from local Dockerfile
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args: 
+        - VERSION=${VERSION}
+        - VCS_REF=${VCS_REF}
+        - BUILD_DATE=${BUILD_DATE}
+    # For production, download prebuilt image
+    #image: ${IMAGE_NAME}
+    container_name: coturn
+    hostname: turn
+    domainname: ${DOMAIN}
+    restart: always
+    network_mode: "host"
+    tty: true
+    expose:
+      - '3478'
+      - '5349'
+      - '3479'
+      - '5350'
+    #ports:
+    #  - '8080:8080'
+    environment:
+      - LISTENING_PORT=3478
+      - TLS_LISTENING_PORT=5349
+      - ALT_LISTENING_PORT=3479
+      - ALT_TLS_LISTENING_PORT=5350
+      - LISTEN_IPS=${COTURN_LISTEN_IPS}
+      - RELAY_IP=${COTURN_RELAY_IP}
+      - STATIC_AUTH_SECRET=${COTURN_TURN_SECRET}
+      # TODO You need to generate Let's Encrypt certificates for turn.${DOMAIN}
+      #- TLS_CERT=/etc/letsencrypt/archive/turn.${DOMAIN}/fullchain.pem
+      #- TLS_KEY=/etc/letsencrypt/archive/turn.${DOMAIN}/privkey.pem
+      - NO_CLI=1
+      - CLI_PASSWORD=${COTURN_CLI_PASSWORD}
+      - WEB_ADMIN=0
+      - WEB_ADMIN_PORT=8080
+      - WEB_ADMIN_USERNAME=root
+      - WEB_ADMIN_PASSWORD=${COTURN_WEB_ADMIN_PASSWORD}
+      - REALM=turn.${DOMAIN}
+      - VERBOSE=1
+      - DEBUG=0
+      - PROD=1
+      #- USER_DB=/srv/turnserver/db/turndb.sqlite
+      #- LOG_FILE=/srv/turnserver/logs/turn.log
+      #- PID_FILE=/srv/turnserver/turn.pid
+    volumes:
+      - /srv/coturn/data:/srv
+      # TODO You need to generate Let's Encrypt certificates for turn.${DOMAIN}
+      #- /etc/letsencrypt/live/turn.${DOMAIN}:/etc/letsencrypt/archive/turn.${DOMAIN}:ro
+      #- /etc/letsencrypt/archive/turn.${DOMAIN}:/etc/letsencrypt/archive/turn.${DOMAIN}:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro

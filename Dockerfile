@@ -55,10 +55,12 @@ RUN set -ex; \
 	\
 	&& apk add --no-cache \
 		hiredis \
+		icu-libs \
 		libevent \
 		libcrypto1.1 \
 		libssl1.1 \
-		libpq mariadb-connector-c \
+		libpq \
+		mariadb-connector-c \
 		snappy \
 		sqlite-libs \
 		zlib \
@@ -84,7 +86,7 @@ RUN set -ex; \
 	; \
 	curl -fL \
 		-o /tmp/mongo-c-driver.tar.gz \
-		https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz \
+		"https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz" \
  	&& tar -xzf /tmp/mongo-c-driver.tar.gz -C /tmp/ \
  	&& cd /tmp/mongo-c-driver-* \
  	&& mkdir -p /tmp/build/mongo-c-driver/ \
@@ -111,7 +113,7 @@ RUN set -ex; \
 	&& make install; \
 	curl -fL \
 		-o /tmp/coturn.tar.gz \
-		https://github.com/coturn/coturn/archive/${VERSION}.tar.gz \
+		"https://github.com/coturn/coturn/archive/${VERSION}.tar.gz" \
 	&& tar -xzf /tmp/coturn.tar.gz -C /tmp/ \
 	&& cd /tmp/coturn-* \
 	\
