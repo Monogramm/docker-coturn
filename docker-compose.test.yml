@@ -21,7 +21,7 @@ services:
       context: ./
       dockerfile: Dockerfile
       args: 
-        - VERSION=${VERSION}
+        - VERSION=${DOCKER_TAG}
         - VCS_REF=${VCS_REF}
         - BUILD_DATE=${BUILD_DATE}
     # For production, download prebuilt image
