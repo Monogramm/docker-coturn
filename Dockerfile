@@ -86,7 +86,7 @@ RUN set -ex; \
 	; \
 	curl -fL \
 		-o /tmp/mongo-c-driver.tar.gz \
-		https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz \
+		"https://github.com/mongodb/mongo-c-driver/archive/${MONGO_C_DRIVER_VERSION}.tar.gz" \
  	&& tar -xzf /tmp/mongo-c-driver.tar.gz -C /tmp/ \
  	&& cd /tmp/mongo-c-driver-* \
  	&& mkdir -p /tmp/build/mongo-c-driver/ \

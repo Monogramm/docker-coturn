@@ -1,7 +1,3 @@
-
-[uri_license]: http://www.gnu.org/licenses/agpl.html
-[uri_license_image]: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
-
 [![License: AGPL v3][uri_license_image]][uri_license]
 [![Build Status](https://travis-ci.org/Monogramm/docker-coturn.svg)](https://travis-ci.org/Monogramm/docker-coturn)
 [![Docker Automated buid](https://img.shields.io/docker/cloud/build/monogramm/docker-coturn.svg)](https://hub.docker.com/r/monogramm/docker-coturn/)
@@ -29,45 +25,35 @@ Furthermore, to get best firewall traversal it is recommended to let the TURN se
 
 Due to the nature of TURN, the container needs to use the hosts network. To  configure the details, create the config file `data/config` like this minimal example:
 
-```
-LISTENING_PORT=443
-ALT_LISTENING_PORT=3478
-LISTEN_IPS="##FIRST_IP## ##SECOND_IP##"
-RELAY_IP=##FIRST_IP##
-STATIC_AUTH_SECRET=##SECRET##
-REALM=myturnserver
-VERBOSE=1
-```
+    LISTENING_PORT=443
+    ALT_LISTENING_PORT=3478
+    LISTEN_IPS="##FIRST_IP## ##SECOND_IP##"
+    RELAY_IP=##FIRST_IP##
+    STATIC_AUTH_SECRET=##SECRET##
+    REALM=myturnserver
+    VERBOSE=1
 
 Of course replace the ##placeholders## with the appropriate values. Also as we are using host networking, make sure the IPs you use here are actually configured and up.
 
 There are many more configuration settings. See `data/config.example` for a full production ready example. For the whole list see the `coturn.sh` script.
 
-
 ## Run TURN server Docker image
 
-```
-docker run --rm --net=host --name my-webrtc-turnserver -i -v `pwd`/data:/srv -t docker-coturn
-```
+    docker run --rm --net=host --name my-webrtc-turnserver -i -v `pwd`/data:/srv -t docker-coturn
 
 This runs the container with the settings as defined in the `config` file which is  made available to the container using the volume (-v) option. This volume is also used as storage for persistent data created by the TURN server.
-
 
 ## Spreed WebRTC integration
 
 When the TURN server is running, make sure you have set `STATIC_AUTH_SECRET` in the `config` file. That is the value you need to use as `turnSecret` in the Spreed WebRTC `server.conf`. Last do not forget to also set `turnURIs` to point to your TURN servers end points and provided protocols.
 
-```
-turnSecret = ##SECRET##
-turnURIs = turn:##FIRST_IP##:443?transport=udp turn:##FIRST_IP##:443?transport=tcp
-```
+    turnSecret = ##SECRET##
+    turnURIs = turn:##FIRST_IP##:443?transport=udp turn:##FIRST_IP##:443?transport=tcp
 
 Or, if you have configured TLS for TURN:
 
-```
-turnSecret = ##SECRET##
-turnURIs = turns:##FQDN##:443?transport=udp turns:##FQDN##:443?transport=tcp turn:##FQDN##:443?transport=udp turn:##FQDN##:443?transport=tcp
-```
+    turnSecret = ##SECRET##
+    turnURIs = turns:##FQDN##:443?transport=udp turns:##FQDN##:443?transport=tcp turn:##FQDN##:443?transport=udp turn:##FQDN##:443?transport=tcp
 
 Of course you can always use the full qualified domain name (##FQDN##) if you have it (DNS configuration) but it is only mandatory for TURN/STUN with TLS.
 
@@ -75,3 +61,6 @@ And last, you can disable the `stunURIs` setting, as the TURN server will also p
 
 Do not forget to restart Spreed WebRTC and to reload the Web client to receive new TURN credentials.
 
+[uri_license]: http://www.gnu.org/licenses/agpl.html
+
+[uri_license_image]: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
