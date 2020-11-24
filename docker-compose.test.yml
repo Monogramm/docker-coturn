@@ -38,7 +38,7 @@ services:
       - '3479'
       - '5350'
     #ports:
-    #  - '16980:16980'
+    #  - '8080:8080'
     environment:
       - LISTENING_PORT=3478
       - TLS_LISTENING_PORT=5349
@@ -53,7 +53,7 @@ services:
       - NO_CLI=1
       - CLI_PASSWORD=${COTURN_CLI_PASSWORD}
       - WEB_ADMIN=0
-      #- WEB_ADMIN_PORT=16980
+      - WEB_ADMIN_PORT=8080
       - WEB_ADMIN_USERNAME=root
       - WEB_ADMIN_PASSWORD=${COTURN_WEB_ADMIN_PASSWORD}
       - REALM=turn.${DOMAIN}

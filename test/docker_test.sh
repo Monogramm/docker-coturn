@@ -3,7 +3,7 @@
 set -e
 
 echo "Waiting to ensure everything is fully ready for the tests..."
-sleep 60
+sleep 120
 
 if ! ping -c 10 -q coturn ; then
     echo 'Coturn Main container is not responding!'
